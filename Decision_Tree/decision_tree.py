@@ -1,26 +1,17 @@
 import numpy as np
 class DecisionTree(object):
-    """
-    Class to create decision tree
-    """
     def __init__(self, _max_depth, _min_splits):
         self.max_depth = _max_depth
         self.min_splits = _min_splits
 
     def fit(self, _feature, _label):
-        """
-        fit function will stack the data and populate the tree
-        """
+
         self.feature = _feature
         self.label = _label
         self.train_data = np.column_stack((self.feature,self.label))
         self.build_tree()
 
-
     def compute_gini_similarity(self, groups, class_labels):
-        """
-        compute the gini index for the groups and class labels
-        """
         num_sample = sum([len(group) for group in groups])
         gini_score = 0
 
@@ -38,18 +29,10 @@ class DecisionTree(object):
         return gini_score
 
     def terminal_node(self, _group):
-        """
-        Function set terminal node as the most common class in the group to make prediction later on
-        is an helper function used to mark the leaf node in the tree based on the early stop condition
-        or actual stop condition which ever is meet early
-        """
         class_labels, count = np.unique(_group[:,-1], return_counts= True)
         return class_labels[np.argmax(count)]
 
     def split(self, index, val, data):
-        """
-        split features into two groups based on their values
-        """
         data_left = np.array([]).reshape(0,self.train_data.shape[1])
         data_right = np.array([]).reshape(0, self.train_data.shape[1])
 
@@ -63,9 +46,6 @@ class DecisionTree(object):
         return data_left, data_right
 
     def best_split(self, data):
-        """
-        find the best split information using the gini score
-        """
         class_labels = np.unique(data[:,-1])
         best_index = 999
         best_val = 999
@@ -90,17 +70,6 @@ class DecisionTree(object):
 
 
     def split_branch(self, node, depth):
-        """
-        recursively split the data and
-        check for early stop argument based on self.max_depth and self.min_splits
-        - check if left or right groups are empty is yess craete terminal node
-        - check if we have reached max_depth early stop condition if yes create terminal node
-        - Consider left node, check if the group is too small using min_split condition
-            - if yes create terminal node
-            - else continue to build the tree
-        - same is done to the right side as well.
-        else
-        """
         left_node , right_node = node['groups']
         del(node['groups'])
 
@@ -128,20 +97,11 @@ class DecisionTree(object):
             self.split_branch(node['right'],depth + 1)
 
     def build_tree(self):
-        """
-        build tree recursively with help of split_branch function
-         - Create a root node
-         - call recursive split_branch to build the complete tree
-        """
         self.root = self.best_split(self.train_data)
         self.split_branch(self.root, 1)
         return self.root
 
     def _predict(self, node, row):
-        """
-        Recursively traverse through the tress to determine the
-        class of unseen sample data point during prediction
-        """
         if row[node['index']] < node['val']:
             if isinstance(node['left'], dict):
                 return self._predict(node['left'], row)
@@ -155,9 +115,6 @@ class DecisionTree(object):
                 return node['right']
 
     def predict(self, test_data):
-        """
-        predict the set of data point
-        """
         self.predicted_label = np.array([])
         for idx in test_data:
             self.predicted_label = np.append(self.predicted_label, self._predict(self.root,idx))
