@@ -24,7 +24,7 @@ def main():
     x = wine_data.data[:,:2] # isolate features
     y = wine_data.target # isolate target
     X_train, X_test, y_train, y_test = train_test_split(x, y, random_state= 42) # split data for train/test set
-
+    
     # Our decision tree
     decision_tree_model =  dt.DecisionTree(_max_depth = 2, _min_splits = 30)
     decision_tree_model.fit(X_train, y_train)
@@ -34,9 +34,9 @@ def main():
     sk_dt_model = DecisionTreeClassifier(max_depth= 2, min_samples_split= 30)
     sk_dt_model.fit(X_train, y_train)
     sk_dt_prediction = sk_dt_model.predict(X_test)
-
+    print(prediction)
     # Printing results
-    print("Our Model's Accuracy: {0}".format(accuracy(prediction, y_test)))
+    print("My Model's Accuracy: {0}".format(accuracy(prediction, y_test)))
     print("Sklearn Accuracy: {0}".format(accuracy(sk_dt_prediction, y_test)))
 
 

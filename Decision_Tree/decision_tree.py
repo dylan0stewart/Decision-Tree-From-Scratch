@@ -5,7 +5,6 @@ class DecisionTree(object):
         self.min_splits = _min_splits
 
     def fit(self, _feature, _label):
-
         self.feature = _feature
         self.label = _label
         self.train_data = np.column_stack((self.feature,self.label))
@@ -22,8 +21,8 @@ class DecisionTree(object):
                 continue
             score = 0.0
             for label in class_labels:
-                porportion = (group[:,-1] == label).sum() / size
-                score += porportion * porportion
+                proportion = (group[:,-1] == label).sum() / size # find proportion by taking everything but the last from the group, summing and dividing by size
+                score += proportion * proportion #square it and add it to find the score
             gini_score += (1.0 - score) * (size/num_sample)
 
         return gini_score
@@ -52,16 +51,17 @@ class DecisionTree(object):
         best_score = 999
         best_groups = None
 
-        for idx in range(data.shape[1]-1):
-            for row in data:
+        for idx in range(data.shape[1]-1):# loop through 1 less than the shape to look for splits
+            for row in data:  # find gini score and 2 options for every row
                 groups = self.split(idx, row[idx], data)
                 gini_score = self.compute_gini_similarity(groups,class_labels)
 
-                if gini_score < best_score:
+                if gini_score < best_score: # if(really more when) gini score is lower than the best score, set best_score equal to the gini score, and set the rest to the data
                     best_index = idx
                     best_val = row[idx]
                     best_score = gini_score
                     best_groups = groups
+        # make result and set values equal to values found above
         result = {}
         result['index'] = best_index
         result['val'] = best_val
@@ -72,7 +72,7 @@ class DecisionTree(object):
     def split_branch(self, node, depth):
         left_node , right_node = node['groups']
         del(node['groups'])
-
+        #if no nodes are arrays, create terminal nodes
         if not isinstance(left_node,np.ndarray) or not isinstance(right_node,np.ndarray):
             node['left'] = self.terminal_node(left_node + right_node)
             node['right'] = self.terminal_node(left_node + right_node)
@@ -82,14 +82,15 @@ class DecisionTree(object):
             node['left'] = self.terminal_node(left_node)
             node['right'] = self.terminal_node(right_node)
             return
-
+        #if left or right node havent met minimum splits, create new node
         if len(left_node) <= self.min_splits:
             node['left'] = self.terminal_node(left_node)
+        #else split instead
         else:
             node['left'] = self.best_split(left_node)
             self.split_branch(node['left'],depth + 1)
 
-
+        #smae for right
         if len(right_node) <= self.min_splits:
             node['right'] = self.terminal_node(right_node)
         else:
